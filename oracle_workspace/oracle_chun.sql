@@ -66,4 +66,6 @@ select student_no,
        student_name,
        student_ssn 
 from tb_student
-where absence_yn = 'N' and student_address like '%전주%';
+where extract(year from entrance_date) =2002 
+      and absence_yn = 'N' 
+      and student_address like '%전주%';
