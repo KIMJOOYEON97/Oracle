@@ -25,13 +25,14 @@ where student_no = 'A513079' or
       student_no = 'A513091' or
       student_no = 'A513110' or
       student_no = 'A513119'
+--WHERE  STUDENT_NO IN ('A513079','A513090','A513091','A513110','A513119');      
 order by student_name desc;
       
 --5. 입학정원이 20 명 이상 30 명 이하인 학과들의 학과 이름과 계열을 출력하시오.
 --DEPARTMENT_NAME CATEGORY
 -------------------- -------------
 select department_name,
-       capacity
+       category
 from tb_department
 where capacity between '20' and '30';
 
@@ -65,4 +66,4 @@ select student_no,
        student_name,
        student_ssn 
 from tb_student
-where absence_yn = 'N';
+where absence_yn = 'N' and student_address like '%전주%';
