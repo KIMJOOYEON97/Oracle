@@ -27,11 +27,19 @@ create user kh
 identified by kh --비밀번호(대소문자 구분)
 default tablespace users; --데이터가 저장될 영역 system | users
 
+create user qwerty
+identified by qwerty
+default tablespace users;
+
+--drop user qwerty;
+
 --사용자 삭제
 --drop user kh; ctrl+/ => 주석 단축키
 
 --접속권한 create session이 포함된 role(권한묶음)connect부여
 --grant connect to kh;
+--grant connect to qwerty;
+
 --테이블등 객체 생성권한이 포함된 role resource 부여
 grant resource to kh;
 --테이블 생성권한만 부여
@@ -39,3 +47,18 @@ grant resource to kh;
 
 --한번에 부여하기
 grant connect resource to kh;
+
+--chun계정 생성
+creat user chun
+identified by chun
+default table users;
+
+--connect, resource를 부여
+grant connect, resource to chun;
+
+--role(권한 묶음)에 포함된 권한 확인
+--DataDictionary db의 각 객체에 대한 메타정보를 확인할 수 있는 read-me 테이블
+select *
+from dba_sys_privs
+where grantee in('CONNECT','RESOURCE');
+

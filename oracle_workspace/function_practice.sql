@@ -70,6 +70,8 @@ select emp_id 사원번호,
         extract(year from sysdate)
             - (decode(substr(emp_no,8,1),'1',1900,'2',1900,'3',2000,'4',2000)+to_number(substr(emp_no,1,2)))+1
         현재나이                    
+--        extract(year from sysdate) - 
+--        (substr(emp_no,1,2) + case when substr(emp_no,8,1) in ('1','2') then 1900 else 2000 end)+1 현재나이
 from employee;
 
 --7. 직원명, 직급코드, 연봉(원) 조회
@@ -79,7 +81,7 @@ from employee;
 
 select emp_name 직원명,
        job_code 직급코드,
-       to_char((salary+(salary*nvl(bonus,0)))*12,'fmL999,999,999,999' )연봉
+       to_char((salary+(salary*nvl(bonus,0)))*12,'fmL999,999,999,999' ) 연봉
 from employee;
 
 --8. 부서코드가 D5, D9인 직원들 중에서 2004년도에 입사한 직원중에 조회함.

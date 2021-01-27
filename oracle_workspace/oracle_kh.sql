@@ -942,18 +942,62 @@ from employee;
 select max(salary),min(salary), --누군지는 모르고 값만 구한것
        max(hire_date), min(hire_date),
        max(emp_name), min(emp_name) --min이 제일 빠른 것이다.
+from employee;
+
+--나이 추출시 주의점
+--현재년도 - 탄생년도 + 1 =>한국식 나이
+select emp_name,
+       emp_no,
+       substr(emp_no,1,2),
+--       extract(year from to_date(substr(emp_no,1,2),'yy')),
+--       extract(year from sysdate) - extract(year from to_date(substr(emp_no,1,2),'yy'))+1     
+--       extract(year from to_date(substr(emp_no,1,2),'rr')),
+--       extract(year from sysdate) - extract(year from to_date(substr(emp_no,1,2),'rr'))+1 
+         extract(year from sysdate) -
+         (decode(substr(emp_no,8,1),'1',1900,'2',1900,2000)+substr(emp_no,1,2))+1 age
+
+from employee;
+
+--yy는 현재년도 2021 기준으로 현제세기 (2000~2099)범위에서 추측한다.
+--rr는 현재년도 2021 기준으로 (1950~2049)범위에서 추측한다
+
+--============================================
+--DQL
+--============================================
+----------------------------------------------
+--GROUP BY
+----------------------------------------------
+--지정컬럼기준으로 세부적인 그룹핑이 가능하다.
+--group by 구문 없이는 전체를 하나의 그룹으로 취급한다.
+--group by 절에 명시한 컬럼만 select절에 사용가능하다.
+select dept_code,
+--       emp_name, --ORA-00979: not a GROUP BY expression
+       sum(salary)
 from employee
+--group by ();
+group by dept_code; --일반컬럼 | 가공컬럼이 가능 
+--부서별로 급여의 합계
+
+select job_code,
+       trunc(avg(salary),1)
+from employee
+group by job_code
+order by job_code;
+
+--부서코드별 사원수 조회
+select nvl(dept_code,'intern'),
+       count(*), --전체 행 수를 세어버리는 것이다.
+       count(dept_code) --null값을 세지 못한다. 그래서 값이 다르게 된다.
+from employee
+group by dept_code
+order by dept_code;
 
 
 
 
-
-
-
-
-
-
-
+----------------------------------------------
+--HAVING
+----------------------------------------------
 
 
 
