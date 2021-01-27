@@ -20,6 +20,11 @@ select class_no,
 from tb_class_professor
 group by class_no
 having count(professor_no) >=2;
+--select class_no, count(*)
+--from tb_class_professor
+--group by class_no
+--having count(*) >=2
+--order by 2 desc;
 
 
 --4. 학과별로 과목을 구분했을때, 과목구분이 "전공선택"에 한하여 과목수가 
@@ -30,7 +35,11 @@ select department_no 학과번호,
 from tb_class
 where class_type = '전공선택'
 group by department_no, class_type
-having count(class_no) >=10;
+having count(class_no) >=10
+--having count(class_no) >= 10 and class_type ='전공선택'
+--where과 having에 넣어야할 것 고민 => 순서에 따라서 ,,where에서 먼저 걸러지고 그 다음에 having
+
+order by 3 desc;
 
 --[Oracle] ORA-00979: GROUP BY 표현식이 아닙니다
 --select절의 컬럼과 group by절의 컬럼이 같지 않아서 나오는 오류
