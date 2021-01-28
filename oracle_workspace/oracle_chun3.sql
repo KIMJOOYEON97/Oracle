@@ -2,7 +2,7 @@
 --@chun계정으로 실행
 --1. 학번, 학생명, 학과명 조회
 -- 학과 지정이 안된 학생은 존재하지 않는다.
-select D.department_no,
+select S.student_no,
        S.student_name,
        D.department_name
 from tb_department D
@@ -51,8 +51,10 @@ group by S.student_name,s.student_no;
 select P.professor_no 교수번호,
        P.professor_name  교수명,
        count(coach_professor_no)
+--       count(*)
 from tb_professor P
     join tb_student S
      on P.professor_no =S.coach_professor_no
 group by S.coach_professor_no,P.professor_no, P.professor_name
 having count(coach_professor_no) >=5;
+--     count(*) >= 5
