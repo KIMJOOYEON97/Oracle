@@ -983,6 +983,7 @@ select job_code,
 from employee
 group by job_code
 order by job_code;
+--직급별 급여의 평균
 
 --부서코드별 사원수 조회
 select nvl(dept_code,'intern'),
@@ -992,15 +993,206 @@ from employee
 group by dept_code
 order by dept_code;
 
+--부서코드별 사원수, 급여평균, 급여합계 조회
+select nvl(dept_code,'intern') dept_code,
+       count(*) count,
+       to_char( sum(salary),'fmL9,999,999,999') sum,
+       
+from employee
+group by dept_code
+order by dept_code;
 
+--성별 인원수, 평균급여 조회
+select decode(substr(emp_no,8,1),'1','남','3','남','여') gender,
+       count(*) count,
+       to_char(trunc(avg(salary),1),'fmL9,999,999,999') avg
+from employee
+group by decode(substr(emp_no,8,1),'1','남','3','남','여'); 
+        --기존컬럼을 가지고 어떤 값을 치환한 다음에 치환한 값을 기준으로 삼는다.
+        
+--직급코드 J1을 제외하고, 입사년도별 인원수를 조회
+select  extract(year from hire_date) yyyy, --group by에 쓴 거 그대로 써야한다.
+       count(*) count
+from employee
+where job_code <> 'J1'
+group by extract(year from hire_date)
+order by yyyy;
 
+--두개 이상의 컬럼으로 그룹핑 가능
+select nvl(dept_code,'인턴')dept_code, --select절 보이는 부분
+       job_code,
+       count(*)
+from employee
+group by dept_code, job_code
+order by 1,2; --1로 먼저 정렬시키고 나머지는 2로 정렬 시켜라. 컬럼 순서 의미
+
+--같은 부서 내에서 다시 직급이 같은 사람끼리 그룹핑
+--null도 하나의 그룹으로 인식한다.
+
+--부서별 성별 인원수 조회
+select  nvl(dept_code,'인턴')dept_code,
+        decode(substr(emp_no,8,1),'1','남','3','남','여')gender,
+        count(*)
+from employee
+group by dept_code,
+         decode(substr(emp_no,8,1),'1','남','3','남','여')
+order by 1,2;
+--order by 1,2,3은 order by 1,2와 동일하다.
 
 ----------------------------------------------
 --HAVING
 ----------------------------------------------
+--group by 이후 조건절   --where절 조건절 특정 조건으로 필터링하는 것.
+                        --where절에는 그룹함수를 쓸 수 없다
+--                        where avg(salary) >=3000000 =>불가
+
+--부서별 평균급여가 3,000,000원 이상인 부서만 조회
+select dept_code,
+       trunc(avg(salary))avg
+from employee
+group by dept_code
+having avg(salary) >= 3000000
+order by 1;
+
+--직급별 인원수가 3명이상인 직급과 인원수 조회
+select job_code,
+       count(*)
+from employee
+group by job_code
+having count(*) >= 3
+order by 1;
+
+--관리하는 사원이 2명이상인 manager의 아이디와 관리하는 사원수 조회
+--직속 상관이 같은 행들을 묶어준다.
+--1) where절로 한번 필터링 후에 함
+select manager_id,
+       count(*)
+from employee
+where manager_id is not null
+group by manager_id
+having count(*) >= 2
+order by 1;
+--2)count를 사용해서 null값을 배제
+select manager_id,
+       count(*)
+from employee
+group by manager_id
+having count(manager_id) >= 2
+order by 1;
+--3)having절에 조건 다 넣기
+select manager_id,
+       count(*)
+from employee
+group by manager_id
+having count(*) >= 2 and manager_id is not null
+order by 1;
+
+--rollup | cube(col1,col2...)
+--group by절에 사용하는 함수
+--그룹핑 결과에 대해 소개를 제공
+
+--rollup 지정컬럼에 대해 단방향 소계 제공
+--cube 지정컬럼에 대해 양방향 소계 제공
+--지정컬럼이 하나인 경우 rollup|cube의 결과는 같다. => 두개 이상부터 차이가 난다는 것
+select dept_code,
+       count(*)
+from employee
+group by rollup(dept_code)
+order by 1;
+--전체 값을 더한 값을 보여줌 =>총합을 제공한다.
+
+select dept_code,
+       count(*)
+from employee
+group by rollup(dept_code)
+order by 1;
+
+--grouping()
+--실제데이터(0) | 집계데이터(1)컬럼을 구분하는 함수
+--실제데이터는 0을 리턴 / 집계데이터는 1을 리턴
+select decode(grouping(dept_code),0,nvl(dept_code,'인턴'),1,'합계')dept_code,
+        --실제 데이터와 집계 데이터를 nvl이 구분 X => 처리하기 위해서는 grouping함수 필요
+       grouping(dept_code),
+       count(*)
+from employee
+group by rollup(dept_code)
+order by 1;
+
+--두개이상의 컬럼을 rollup|cube에 전달하는 경우
+select decode(grouping(dept_code),0,nvl(dept_code,'인턴'),'합계')dept_code,
+       decode(grouping(job_code),0,job_code,'소계') job_code,
+       count(*)
+ from employee
+ group by rollup(dept_code, job_code) --부서코드별 소계
+ order by 1,2;
+ 
+ select decode(grouping(dept_code),0,nvl(dept_code,'intern'),'소계')dept_code,
+        decode(grouping(job_code),0,job_code,'소계')job_code,
+       count(*)
+from employee
+group by cube(dept_code,job_code)
+order by 1,2;
+
+/*
+select (5) 보여주세요
+from (1) 어떤 테이블에서 
+where (2) 어떤 행을
+group by (3) 어떤 그룹으로
+having (4) ??
+order by (6) ??
+*/
+
+--relation 만들기
+--가로방향 합치기 JOIN 행+행
+--세로방향 합치기 UNION 열+열
 
 
+--====================================================
+--JOIN
+--====================================================
+--두개 이상의 테이블을 연결해서 하나의 가상테이블(relation)을 생성
+--기준컬럼을 가지고 행을 연결한다.
+
+--송종기 사원의 부서명을 조회 
+select dept_code
+from employee --부서명은 없고 부서코드만 있다.
+where emp_name = '송종기'; 
+--만약 employee와 department가 합쳐져 있다면 한 방에 끝났을텐데..
+--기준컬럼 dept_code,dept_id
+select dept_title --총무부
+from department --부서명은 여기에
+where dept_id = 'D9';
+
+--join
+select D.dept_title
+from employee E join department D 
+            --E 테이블에도 별칭을 붙일 수 있다. as,"" 사용하지 않는다.
+  on E.dept_code = D.dept_id
+where E.emp_name = '송종기';
 
 
+select * from employee;
+select * from department;
 
+--join 종류
+--1. EQUI - JOIN 동등비교조건(=)에 의한 조인
 
+--2. NON - EQUI JOIN 동등비교조건이 아닌(between and, in, not in, !=,like 등)조인
+
+--join 문법
+--1.ANSI 표준문법 : 모든 DBMS 공통문법
+--2.Vendor별 문법 : DBMS별로 지원하는 문법, 오라클전용문법
+
+--equi-join 종류
+/*
+1.inner join
+
+2.outter join
+
+3.cross join
+
+4.self join
+
+5. multiple join
+
+*/
