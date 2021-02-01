@@ -56,5 +56,6 @@ from tb_professor P
     join tb_student S
      on P.professor_no =S.coach_professor_no
 group by S.coach_professor_no,P.professor_no, P.professor_name
+--group by P.professor_no, P.professor_name
 having count(coach_professor_no) >=5;
 --     count(*) >= 5

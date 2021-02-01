@@ -36,6 +36,16 @@ from employee E
 where trunc((sysdate - (to_date((decode(substr(emp_no,8,1),'1',1900,'2',1900,2000)+substr(emp_no,1,2)) || substr(emp_no,3,4))))/365)
         =(select min(trunc((sysdate - (to_date((decode(substr(emp_no,8,1),'1',1900,'2',1900,2000)+substr(emp_no,1,2)) || substr(emp_no,3,4))))/365)) from employee);
 
+select emp_id 사번
+     , emp_name 사원명
+     , extract(year from sysdate)-(decode(substr(emp_no,8,1),'1',1900,'2',1900,2000))-substr(emp_no,1,2)+1 나이
+     , dept_title 부서명
+     , job_name 직급명
+from employee 
+    cross join (select min(extract(year from sysdate)-(decode(substr(emp_no,8,1),'1',1900,'2',1900,2000))-substr(emp_no,1,2))+1 min_age from employee)
+    left join department on dept_code = dept_id
+    left join job  using(job_code)
+
 --4. 이름에 '형'자가 들어가는 직원들의 사번, 사원명, 부서명을 조회하시오.
 
 select E.emp_id 사번,

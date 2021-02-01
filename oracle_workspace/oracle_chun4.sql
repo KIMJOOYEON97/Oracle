@@ -16,6 +16,8 @@ from tb_student S
     left join tb_professor P
       on S.coach_professor_no = P.professor_no;
 
+
+
 --3. 학과별 교수명과 인원수를 모두 표시하세요.
 select D.department_name,
        count(*)
@@ -23,6 +25,13 @@ from tb_department D
     join tb_professor P
       on  D.department_no = P.department_no 
 group by D.department_name;
+
+select decode(grouping(department_name),0,nvl(department_name,'미지정'),1,'총계') 학과명
+       , decode(grouping(professor_name),0,professor_name,1,count(*)) 교수명  
+from tb_professor p 
+    left join tb_department d using(department_no)
+group by rollup(department_name, professor_name)
+order by d.department_name;
 
 -- 4. 이름이 [~람]인 학생의 평균학점을 구해서 학생명과 평균학점(반올림해서 소수점둘째자리까지)과 같이 출력.
 -- (동명이인일 경우에 대비해서 student_name만으로 group by 할 수 없다.)
