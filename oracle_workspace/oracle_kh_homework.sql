@@ -45,7 +45,8 @@ from employee
     cross join (select min(extract(year from sysdate)-(decode(substr(emp_no,8,1),'1',1900,'2',1900,2000))-substr(emp_no,1,2))+1 min_age from employee)
     left join department on dept_code = dept_id
     left join job  using(job_code)
-
+where 
+    extract(year from sysdate)-(decode(substr(emp_no,8,1),'1',1900,'2',1900,2000))-substr(emp_no,1,2)+1 = min_age;
 --4. 이름에 '형'자가 들어가는 직원들의 사번, 사원명, 부서명을 조회하시오.
 
 select E.emp_id 사번,
@@ -160,3 +161,72 @@ where E.bonus is null and  J.job_name in('차장','사원');
 select sum(decode(quit_yn,'N',1,0)) "재직중인 직원",
        sum(decode(quit_yn,'Y',1,0)) "퇴사한 직원의 수"
 from employee;
+
+select dept_code 부서명,
+       sum(salary) 급여합
+from employee
+group by dept_code
+having sum(salary)>9000000;
+
+select emp_name 사원명,
+       rpad(substr(emp_no,1,8),13,'*')주민번호
+from employee
+where substr(emp_no,8,1) in('1','3');
+
+--merit_rating이 'A'라면 salary의 20%만큼 보너스를 부여한다.
+--merit_rating이 'B'라면 salary의 15%만큼 보너스를 부여한다.
+--merit_rating이 'C'라면 salary의 10%만큼 보너스를 부여한다.
+--그 외 merit_rating값은 보너스가 없다.
+select dept_code,
+        case dept_code
+          when 'D1' then salary*0.2
+          when 'D2' then salary*0.15
+          when 'D5' then salary*0.1
+          else 0
+          end 성과급
+from employee;
+
+SELECT
+
+NVL(EMP_NAME,'그룹별 총합')
+
+, JOB_CODE
+
+, COUNT(*) AS 사원수
+
+FROM
+
+employee
+
+WHERE
+
+BONUS is not NULL
+
+GROUP BY ROLLUP(EMP_NAME),job_code
+
+ORDER BY JOB_CODE;
+
+
+SELECT
+
+DEPT_CODE
+
+, SUM(SALARY) 합계
+
+, FLOOR(AVG(SALARY)) 평균
+
+, COUNT(*) 인원수
+
+FROM
+
+EMPLOYEE
+
+GROUP BY DEPT_CODE
+--HAVING AVG(SALARY) >2800000
+ORDER BY DEPT_CODE ASC;
+
+
+SELECT*
+FROM EMPLOYEE;
+
+

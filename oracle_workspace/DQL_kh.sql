@@ -32,7 +32,15 @@ from employee E1
     cross join (select avg(salary) avg from employee)
 where E1.manager_id is not null 
     and E1.salary > avg;
-      
+--JOIN
+SELECT A.EMP_ID 사번
+        ,A.EMP_NAME 이름
+        ,B.EMP_NAME 매니져이름
+        ,A.SALARY월급
+FROM EMPLOYEE A JOIN EMPLOYEE B
+    ON A.MANAGER_ID = B.EMP_ID
+WHERE A.MANAGER_ID IS NOT NULL
+    AND A.SALARY > (SELECT AVG(SALARY) FROM EMPLOYEE);      
 
 --    2. JOIN하지 않고, 스칼라상관쿼리(SELECT)를 이용하기
 
@@ -42,7 +50,14 @@ select emp_id 사번,
 from employee 
 where manager_id is not null 
      and salary >(select avg(salary) from employee);
-
+--스칼라서브쿼리(SELECT)
+SELECT EMP_ID 사번
+        ,EMP_NAME 이름
+        ,(SELECT EMP_NAME FROM EMPLOYEE WHERE E.MANAGER_ID = EMP_ID) 매니져이름
+        ,SALARY 월급
+FROM EMPLOYEE E
+WHERE MANAGER_ID IS NOT NULL
+    AND SALARY > (SELECT AVG(SALARY) FROM EMPLOYEE);
 
 --문제4
 --같은 직급의 평균급여보다 같거나 많은 급여를 받는 직원의 이름, 직급코드, 급여, 급여등급 조회
@@ -108,3 +123,28 @@ select  book_title
 from tbl_books
 group by book_title
 having count(book_title)>=2;
+--7.1.상관서브쿼리 사용
+select *
+from tbl_books A
+where book_title in (select book_title 
+                   from tbl_books 
+                   where book_title = A.book_title and author != A.author );
+                   
+--7.2.group by, having, count(*)
+select book_title
+from tbl_books
+group by book_title
+having count(*) > 1;
+​
+--7.3.상관서브쿼리와 exists( ) 사용
+select *
+from tbl_books A
+where exists (select 1 
+              from tbl_books 
+              where book_title = A.book_title and author != A.author );
+​
+--7.4.조인 사용
+select A.*
+from tbl_books A join tbl_books B
+on A.book_title = B.book_title
+  and A.author != B.author;
